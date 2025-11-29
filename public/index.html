@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>INSPWAL Blob Inspector</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <h1>inspwal Blob Inspector</h1>
+    <p class="subtitle">
+      Check if a Walrus blob or Sui object is reachable on Walrus and see a short preview when it is not protected with Seal.
+    </p>
+
+    <form id="inspectForm">
+      <div class="row">
+        <div class="field-group">
+          <label for="idInput">Blob id, Sui object id, or tx digest</label>
+          <input
+            id="idInput"
+            type="text"
+            autocomplete="off"
+            placeholder="Paste your blob id"
+          />
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="actions">
+          <button type="submit" id="inspectButton">
+            Inspect
+          </button>
+          <div class="pill" id="statusPill">
+            Ready
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="main-layout">
+      <div class="main-col">
+        <div id="resultCard" class="card hidden">
+      <div class="card-header">
+        <div class="card-title" id="resultTitle">Result</div>
+        <div class="badge-row">
+          <span class="badge gray" id="badgeNetwork"></span>
+          <span class="badge gray" id="badgeType"></span>
+          <span class="badge gray" id="badgeAvailability"></span>
+          <span class="badge gray" id="badgeSeal"></span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <div class="field-label">Id</div>
+          <div class="field-value" id="fieldId"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Exists on Walrus</div>
+          <div class="field-value" id="fieldExists"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Mime type</div>
+          <div class="field-value" id="fieldMime"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Size (bytes)</div>
+          <div class="field-value" id="fieldSize"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">SHA-256</div>
+          <div class="field-value" id="fieldSha256"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">SHA-512</div>
+          <div class="field-value" id="fieldSha512"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">BLAKE2b-512</div>
+          <div class="field-value" id="fieldBlake2b512"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">SHA-1</div>
+          <div class="field-value" id="fieldSha1"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">MD5</div>
+          <div class="field-value" id="fieldMd5"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">First bytes (hex)</div>
+          <div class="field-value" id="fieldByteSample"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Outcome</div>
+          <div class="field-value" id="fieldOutcome"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Source</div>
+          <div class="field-value" id="fieldSource"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Magic/format</div>
+          <div class="field-value" id="fieldFormat"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Preview status</div>
+          <div class="field-value" id="fieldPreviewStatus"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Text summary</div>
+          <div class="field-value" id="fieldTextSummary"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Walrus URL</div>
+          <div class="field-value" id="fieldWalrusUrl"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Walrus status</div>
+          <div class="field-value" id="fieldWalrusStatus"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Walrus headers</div>
+          <div class="field-value" id="fieldWalrusHeaders"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Encryption guess</div>
+          <div class="field-value" id="fieldEncryption"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Entropy (bits/byte)</div>
+          <div class="field-value" id="fieldEntropy"></div>
+        </div>
+      </div>
+
+      <div class="note" id="fieldNote"></div>
+
+      <div id="previewWrapper" class="preview-box hidden"></div>
+
+      <div class="json-box" id="jsonBox"></div>
+    </div>
+
+        <div id="suiCard" class="card hidden">
+      <div class="card-header">
+        <div class="card-title">Sui object and transaction</div>
+        <div class="badge-row">
+          <span class="badge gray" id="badgeSuiNetwork"></span>
+          <span class="badge gray" id="badgeSuiStatus"></span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <div class="field-label">Sui object id</div>
+          <div class="field-value" id="suiObjectId"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Object type</div>
+          <div class="field-value" id="suiObjectType"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Owner</div>
+          <div class="field-value" id="suiOwner"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Previous tx digest</div>
+          <div class="field-value" id="suiPrevTx"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Storage rebate</div>
+          <div class="field-value" id="suiStorageRebate"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Creation tx status</div>
+          <div class="field-value" id="suiTxStatus"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Gas used</div>
+          <div class="field-value" id="suiGasUsed"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Events count</div>
+          <div class="field-value" id="suiEventsCount"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Object changes</div>
+          <div class="field-value" id="suiObjectChanges"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Encoding type</div>
+          <div class="field-value" id="suiEncodingType"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Epochs (registered / storage)</div>
+          <div class="field-value" id="suiEpochs"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Blob type</div>
+          <div class="field-value" id="suiBlobType"></div>
+        </div>
+      </div>
+
+      <div class="json-box" id="suiJsonBox"></div>
+    </div>
+
+      </div>
+
+      <aside class="side-col">
+        <div id="relatedPanels"></div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="related.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
