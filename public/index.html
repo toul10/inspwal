@@ -2,41 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>INSPWAL Blob Inspector</title>
+  <title>inspwal: Walrus blob inspector</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;500&family=Atkinson+Hyperlegible+Next:wght@400;500;700&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="page">
-    <h1>inspwal Blob Inspector</h1>
-    <p class="subtitle">
-      Check if a Walrus blob or Sui object is reachable on Walrus and see a short preview when it is not protected with Seal.
-    </p>
+    <header class="masthead">
+      <h1>inspwal</h1>
+      <p class="subtitle">
+        Check whether a Walrus blob or Sui object is reachable, what it contains and whether Seal protects it.
+      </p>
+    </header>
 
     <form id="inspectForm">
+      <label for="idInput">Blob id or Sui object id</label>
       <div class="row">
-        <div class="field-group">
-          <label for="idInput">Blob id or Sui object id</label>
-          <input
-            id="idInput"
-            type="text"
-            autocomplete="off"
-            placeholder="Paste your blob id"
-          />
-        </div>
-
+        <input
+          id="idInput"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Paste a blob id or a 0x… object id"
+        />
+        <button type="submit" id="inspectButton">Inspect</button>
       </div>
-
-      <div class="row">
-        <div class="actions">
-          <button type="submit" id="inspectButton">
-            Inspect
-          </button>
-          <div class="pill" id="statusPill">
-            Ready
-          </div>
-        </div>
-      </div>
+      <div class="pill" id="statusPill" role="status" aria-live="polite">Ready</div>
     </form>
 
     <div class="main-layout">

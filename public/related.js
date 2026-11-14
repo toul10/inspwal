@@ -10,10 +10,6 @@ function makeCard(title, content) {
 
   const body = document.createElement("div");
   body.className = "card-body";
-  body.style.padding = "12px 16px";
-  body.style.fontSize = "13px";
-  body.style.lineHeight = "1.5";
-  body.style.whiteSpace = "pre-wrap";
 
   if (typeof content === "string") {
     body.textContent = content;
@@ -148,7 +144,6 @@ window.renderRelatedPanels = function renderRelatedPanels(data) {
   const byteSample = data.byteSample || null;
 
   const quickCard = makeCard("Quick summary", renderQuickSummary(data));
-  const hashCard = makeCard("Hashes", renderHashList(hashes));
   const encryptionCard = makeCard(
     "Encryption and entropy",
     renderEncryption(encryptionGuess)
@@ -158,7 +153,6 @@ window.renderRelatedPanels = function renderRelatedPanels(data) {
   const walrusCard = makeCard("Walrus details", renderWalrusDetails(data));
 
   relatedContainer.appendChild(quickCard);
-  relatedContainer.appendChild(hashCard);
   relatedContainer.appendChild(encryptionCard);
   relatedContainer.appendChild(sampleCard);
   relatedContainer.appendChild(headerCard);
