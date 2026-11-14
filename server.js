@@ -1016,6 +1016,26 @@ app.get("/inspect-object", async (req, res) => {
     const { hashes, byteSample } = summarizeBytes(bytes);
     let textSummary = null;
 
+    let hasSeal = false;
+    let sealMeta = null;
+    try {
+      const encObj = EncryptedObject.parse(new Uint8Array(bytes));
+      hasSeal = true;
+      sealMeta = {
+        idHex: Buffer.from(encObj.id).toString("hex"),
+        threshold: encObj.threshold,
+        services: Array.isArray(encObj.services)
+          ? encObj.services.map(([objectId, weight]) => ({
+              objectId,
+              weight,
+            }))
+          : [],
+      };
+    } catch (e) {
+      hasSeal = false;
+      sealMeta = null;
+    }
+
     const lowerMime = mimeType.toLowerCase();
     let format = detectBinaryFormat(bytes);
     if (!format) {

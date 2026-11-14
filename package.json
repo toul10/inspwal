@@ -1,14 +1,15 @@
 {
   "name": "inspwal",
   "version": "1.0.0",
-  "description": "Small service to inspect Walrus blobs",
+  "description": "Inspector for Walrus blobs and Sui objects",
   "license": "ISC",
-  "author": "toul",
+  "author": "Konstantinos Toulis",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:blockberry": "node server-Blockberry.js",
+    "index": "node indexer/run.js"
   },
   "dependencies": {
     "@mysten/seal": "^0.9.4",

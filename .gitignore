@@ -1,7 +1,5 @@
+node_modules/
 .env
 .env.local
 .env.*.local
-node_modulesnode_modules
 .DS_Store
-.DS_Store
-node_modules/

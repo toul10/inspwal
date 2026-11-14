@@ -1,100 +1,64 @@
 # inspwal
-Inspector for Walrus blobs ID that shows reachability, hashes, basic content guesses, Seal encryption status and related Sui object and transaction data.
 
-Walrus Blob Inspector for Sui
+Inspector for Walrus blobs and Sui objects. Paste a Walrus blob id or a Sui object id and see whether the blob is reachable, what kind of content it holds, whether it is encrypted with Seal, and the related Sui object and certifying transaction.
 
-inspwal is a tiny web app that lets you paste a Walrus blob id or Sui object id and see
+![inspwal inspecting a Seal-protected blob on Walrus mainnet](docs/screenshot.png)
 
-1) Whether the blob exists on Walrus and on which network  
-2) Basic content classification and hashes  
-3) A short preview when the content is not protected with Seal  
-4) Seal detection using the official Seal SDK  
-5) The related Sui `blob::Blob` object and the certifying transaction
+## What it shows
 
-The front end is a single static page. The back end is a small Express server that talks to Walrus aggregators and to Sui fullnodes plus a helper service that resolves blob id to Sui object id.
+- **Availability:** whether the blob exists on Walrus, and on which network (mainnet or testnet).
+- **Content:** MIME type, size, detected file format, entropy and compression estimates, and SHA-256, SHA-512, BLAKE2b-512, SHA-1 and MD5 hashes.
+- **Preview:** a short text or media preview when the content is not protected.
+- **Seal:** detection of Seal-encrypted objects with the official `@mysten/seal` SDK, including the threshold and the key servers.
+- **Sui data:** the related `blob::Blob` object and the transaction that certified it.
 
+## How it works
 
+The front end is a single static page in `public/`. The back end is a small Express server that talks to Walrus aggregators and Sui fullnodes. The page tries mainnet first and falls back to testnet.
 
+There are two servers:
 
-Back end and Blockberry integration
+| Server | Finds the Sui object of a blob id through | API key |
+|---|---|---|
+| `server.js` | a local index, `indexer/blob_index.json` | not needed |
+| `server-Blockberry.js` | the Blockberry API, at request time | `BLOCKBERRY_API_KEY` |
 
+## Quick start
 
+Requires Node.js 18 or later.
 
-There are two Node back ends in this repo. Both take a Walrus blob id as input.
+```bash
+npm install
+cp .env.example .env
+npm start
+```
 
-server-Blockberry.js (main server)
+Then open http://localhost:3001.
 
-This is the main inspector server used in production. It:
+To use the Blockberry server instead, add a key from [api.blockberry.one](https://api.blockberry.one/) to `.env` and run:
 
-serves the front end from public
+```bash
+npm run start:blockberry
+```
 
-queries Walrus aggregators
+## The local index
 
-calls Blockberry for extra Walrus and Sui data when needed
+`indexer/run.js` reads `BlobCertified` events from a Sui fullnode and writes `indexer/blob_index.json`. The index maps each blob id (in decimal) to its Sui object id, with its storage epochs and certifying transaction. The repository includes a snapshot from November 2025. Blobs certified after that need a rebuilt index or the Blockberry server.
 
-You need a Blockberry API key for this server.
+To rebuild the index:
 
-Create an account and get an API key from
-https://api.blockberry.one/
+```bash
+npm run index
+```
 
-Create a .env file in the project root (or update your existing one) and add:
+## Configuration
 
-BLOCKBERRY_API_KEY="your key"
+All settings live in `.env`. See [`.env.example`](.env.example).
 
-PORT=3001
-PORT2=3002
-
-BLOCKBERRY_WALRUS_MAINNET_BASE=https://api.blockberry.one/walrus-mainnet/v1
-BLOCKBERRY_WALRUS_TESTNET_BASE=https://api.blockberry.one/walrus-testnet/v1
-
-
-WALRUS_BASE_URL=http://127.0.0.1:9001
-WALRUS_TESTNET_URL=https://aggregator.walrus-testnet.walrus.space
-WALRUS_MAINNET_URL=https://aggregator.walrus-mainnet.walrus.space
-SUI_RPC_TESTNET=https://fullnode.testnet.sui.io:443
-SUI_RPC_MAINNET=https://fullnode.mainnet.sui.io:443
-
-
-
-Start the server:
-
-node server-Blockberry.js
-
-
-
-The inspector will then be available on the configured PORT value, default 3001.
-
-
-
-
-server.js and the local indexer
-
-The second server uses a local index file instead of calling Blockberry at request time.
-
-The indexer script lives at:
-
-indexer/run.js
-
-It calls Blockberry once, downloads blob information and writes:
-
-indexer/blob_index.json
-
-This file contains mappings from blob_id_decimal to object_id, for example:
-
-{
-  "12345678901234567890": "0xabc123...",
-  "98765432109876543210": "0xdef456..."
-}
-
-
-To build or refresh the index:
-
-node indexer/run.js
-
-
-After blob_index.json exists, you can run the lightweight server:
-
-node server.js
-
-
-Trus reachability, content fingerprints and classification, Seal status and the related Sui object and transaction data.   
+| Variable | Used by | Purpose |
+|---|---|---|
+| `PORT` | both servers | HTTP port, default 3001 |
+| `WALRUS_MAINNET_URL`, `WALRUS_TESTNET_URL` | both servers | Walrus aggregators |
+| `SUI_RPC_MAINNET`, `SUI_RPC_TESTNET` | both servers | Sui fullnodes |
+| `SUI_RPC` | indexer | Sui fullnode for the index build, default mainnet |
+| `BLOCKBERRY_API_KEY` | `server-Blockberry.js` | Blockberry access |
