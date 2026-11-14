@@ -2,7 +2,7 @@
 
 Inspector for Walrus blobs and Sui objects. Paste a Walrus blob id or a Sui object id and see whether the blob is reachable, what kind of content it holds, whether it is encrypted with Seal, and the related Sui object and certifying transaction.
 
-![inspwal inspecting a Seal-protected blob on Walrus mainnet](docs/screenshot.png)
+![inspwal inspecting a blob on Walrus mainnet](docs/screenshot.png)
 
 ## What it shows
 
@@ -62,3 +62,7 @@ All settings live in `.env`. See [`.env.example`](.env.example).
 | `SUI_RPC_MAINNET`, `SUI_RPC_TESTNET` | both servers | Sui fullnodes |
 | `SUI_RPC` | indexer | Sui fullnode for the index build, default mainnet |
 | `BLOCKBERRY_API_KEY` | `server-Blockberry.js` | Blockberry access |
+
+## License
+
+ISC. See [LICENSE](LICENSE).
