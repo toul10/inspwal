@@ -65,6 +65,39 @@ function isSealConfirmed(network, blobId) {
 }
 
 // quick text vs binary detector
+// A blob counts as Seal-encrypted only when it is exactly one serialized
+// EncryptedObject: version 0, a valid threshold and no trailing bytes.
+// Parsing alone is not enough, because BCS can read arbitrary bytes as a header.
+function detectSeal(bytes) {
+  try {
+    const encObj = EncryptedObject.parse(new Uint8Array(bytes));
+    const services = Array.isArray(encObj.services) ? encObj.services : [];
+    const consumed = EncryptedObject.serialize(encObj).toBytes().length;
+    if (
+      encObj.version !== 0 ||
+      services.length === 0 ||
+      encObj.threshold < 1 ||
+      encObj.threshold > services.length ||
+      consumed !== bytes.length
+    ) {
+      return { hasSeal: false, sealMeta: null };
+    }
+    return {
+      hasSeal: true,
+      sealMeta: {
+        idHex:
+          typeof encObj.id === "string"
+            ? encObj.id
+            : Buffer.from(encObj.id).toString("hex"),
+        threshold: encObj.threshold,
+        services: services.map(([objectId, weight]) => ({ objectId, weight })),
+      },
+    };
+  } catch (e) {
+    return { hasSeal: false, sealMeta: null };
+  }
+}
+
 function isBinary(bytes) {
   if (!bytes || bytes.length === 0) return false;
 
@@ -674,25 +707,7 @@ app.get("/inspect", async (req, res) => {
     const { hashes, byteSample } = summarizeBytes(bytes);
     let textSummary = null;
 
-    let hasSeal = false;
-    let sealMeta = null;
-    try {
-      const encObj = EncryptedObject.parse(new Uint8Array(bytes));
-      hasSeal = true;
-      sealMeta = {
-        idHex: Buffer.from(encObj.id).toString("hex"),
-        threshold: encObj.threshold,
-        services: Array.isArray(encObj.services)
-          ? encObj.services.map(([objectId, weight]) => ({
-              objectId,
-              weight,
-            }))
-          : [],
-      };
-    } catch (e) {
-      hasSeal = false;
-      sealMeta = null;
-    }
+    const { hasSeal, sealMeta } = detectSeal(bytes);
 
     const lowerMime = mimeType.toLowerCase();
     let format = detectBinaryFormat(bytes);
@@ -1016,25 +1031,7 @@ app.get("/inspect-object", async (req, res) => {
     const { hashes, byteSample } = summarizeBytes(bytes);
     let textSummary = null;
 
-    let hasSeal = false;
-    let sealMeta = null;
-    try {
-      const encObj = EncryptedObject.parse(new Uint8Array(bytes));
-      hasSeal = true;
-      sealMeta = {
-        idHex: Buffer.from(encObj.id).toString("hex"),
-        threshold: encObj.threshold,
-        services: Array.isArray(encObj.services)
-          ? encObj.services.map(([objectId, weight]) => ({
-              objectId,
-              weight,
-            }))
-          : [],
-      };
-    } catch (e) {
-      hasSeal = false;
-      sealMeta = null;
-    }
+    const { hasSeal, sealMeta } = detectSeal(bytes);
 
     const lowerMime = mimeType.toLowerCase();
     let format = detectBinaryFormat(bytes);
