@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node server.js",
     "start:blockberry": "node server-Blockberry.js",
-    "index": "node indexer/run.js"
+    "index": "node indexer/run.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@mysten/seal": "^0.9.4",
